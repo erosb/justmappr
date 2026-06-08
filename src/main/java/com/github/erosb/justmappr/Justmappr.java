@@ -39,7 +39,7 @@ class DefaultJustmappr
             if (rs.next()) {
                 return instantiate(clazz, rs);
             }
-            throw new UnsupportedOperationException("Not supported yet.");
+            throw new EntityNotFoundException(clazz.getSimpleName() + " not found by primary key " + primaryKey);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
