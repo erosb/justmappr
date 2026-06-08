@@ -20,7 +20,7 @@ public interface Justmappr {
         return JustmapprConfig.builder();
     }
 
-    <E> E findById(Class<E> clazz, Object id);
+    <E> E requireById(Class<E> clazz, Object id);
 }
 
 @RequiredArgsConstructor
@@ -30,10 +30,11 @@ class DefaultJustmappr
     private final JustmapprConfig config;
 
     @Override
-    public <E> E findById(Class<E> clazz, Object id) {
+    public <E> E requireById(Class<E> clazz, Object id) {
         try {
             var conn = DriverManager.getConnection(config.getConnection());
-            var stmt = conn.prepareStatement(baseQuery(clazz) + " WHERE id = ?");
+            TypeMappingConfiguration typeMappingConfiguration = config.getTypeMappingConfig().get(clazz);
+            var stmt = conn.prepareStatement(baseQuery(clazz) + " WHERE " + typeMappingConfiguration.getPrimaryKeyMapping().attributeName() + " = ?");
             stmt.setString(1, id.toString());
             var rs = stmt.executeQuery();
             if (rs.next()) {
