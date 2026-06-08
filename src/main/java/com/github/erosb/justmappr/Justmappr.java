@@ -2,7 +2,6 @@ package com.github.erosb.justmappr;
 
 import lombok.RequiredArgsConstructor;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -20,7 +19,7 @@ public interface Justmappr {
         return JustmapprConfig.builder();
     }
 
-    <E> E requireById(Class<E> clazz, Object id);
+    <E> E requireByPK(Class<E> clazz, Object primaryKey);
 }
 
 @RequiredArgsConstructor
@@ -30,12 +29,12 @@ class DefaultJustmappr
     private final JustmapprConfig config;
 
     @Override
-    public <E> E requireById(Class<E> clazz, Object id) {
+    public <E> E requireByPK(Class<E> clazz, Object primaryKey) {
         try {
             var conn = DriverManager.getConnection(config.getConnection());
             TypeMappingConfiguration typeMappingConfiguration = config.getTypeMappingConfig().get(clazz);
-            var stmt = conn.prepareStatement(baseQuery(clazz) + " WHERE " + typeMappingConfiguration.getPrimaryKeyMapping().attributeName() + " = ?");
-            stmt.setString(1, id.toString());
+            var stmt = conn.prepareStatement(baseQuery(clazz) + " WHERE " + typeMappingConfiguration.getPrimaryKeyMapping().getAttributeName() + " = ?");
+            stmt.setString(1, primaryKey.toString());
             var rs = stmt.executeQuery();
             if (rs.next()) {
                 return instantiate(clazz, rs);
@@ -59,10 +58,8 @@ class DefaultJustmappr
         var mappingConfig = config.getTypeMappingConfig().get(clazz);
         try {
             var instance = constr.newInstance();
-            for (Field field : clazz.getDeclaredFields()) {
-                field.setAccessible(true);
-                var fieldValue = rs.getObject(mappingConfig.getAttributeName(field.getName()));
-                field.set(instance, fieldValue);
+            for (FieldMapping fieldMapping : mappingConfig.getFieldMappings()) {
+                fieldMapping.getSetter().apply(instance, rs.getObject(fieldMapping.getAttributeName()));
             }
             return (E) instance;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {

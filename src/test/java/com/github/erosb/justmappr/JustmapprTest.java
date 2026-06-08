@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class JustmapprTest {
 
     @Test
-    public void test()
+    public void requireByPK_success()
             throws Exception {
         var justmappr = Justmappr.create(Justmappr.config()
                 .connection("jdbc:h2:mem:test")
@@ -25,7 +25,7 @@ public class JustmapprTest {
         st.execute("create table users (id int primary key auto_increment, name text)");
         st.executeUpdate("insert into users (name) values ('asdasd'), ('bsdbsd')");
 
-        User u = justmappr.requireById(User.class, 1);
+        User u = justmappr.requireByPK(User.class, 1);
         assertEquals("asdasd", u.getName());
         assertEquals(1, u.getId());
     }

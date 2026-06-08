@@ -1,17 +1,17 @@
 package com.github.erosb.justmappr;
 
-import lombok.RequiredArgsConstructor;
+import lombok.NonNull;
+import lombok.Value;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-@RequiredArgsConstructor
-public class FieldMapping<E, PK> {
-    private final String attributeName;
-    private final BiFunction<E, PK, E> setter;
-    private final Function<E, PK> getter;
-
-    public String attributeName() {
-        return attributeName;
-    }
+@Value
+public class FieldMapping<E, F> {
+    @NonNull
+    String attributeName;
+    @NonNull
+    BiFunction<E, F, E> setter;
+    @NonNull
+    Function<E, F> getter;
 }
