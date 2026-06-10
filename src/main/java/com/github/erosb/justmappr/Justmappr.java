@@ -48,7 +48,7 @@ class DefaultJustmappr
     private <E> String baseQuery(Class<E> clazz) {
         var mappingConfig = config.mappingConfigOfType(clazz);
         String selectClause = "SELECT " + mappingConfig.getAttributeNames().stream().collect(joining(", "));
-        String fromClause = "FROM " + mappingConfig.getRelationName();
+        String fromClause = "FROM `" + mappingConfig.getRelationName() + "`";
         return selectClause + " " + fromClause;
     }
 

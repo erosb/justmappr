@@ -134,7 +134,7 @@ class TrivialTypeMappingConfiguration<E>
 
     @Override
     public ReconstitutionFactory<?> getReconstitutionFactory() {
-        throw new UnsupportedOperationException("nono");
+        return new SetterBasedReconstitutionFactory(javaType, fieldMappings);
     }
 
     @Override

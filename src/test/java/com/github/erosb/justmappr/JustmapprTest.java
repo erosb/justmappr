@@ -22,8 +22,8 @@ public class JustmapprTest {
         Class.forName("org.h2.Driver");
         Connection conn = DriverManager.getConnection("jdbc:h2:mem:test");
         Statement st = conn.createStatement();
-        st.execute("create table users (id int primary key auto_increment, name text)");
-        st.executeUpdate("insert into users (name) values ('asdasd'), ('bsdbsd')");
+        st.execute("create table `user` (id int primary key auto_increment, name text)");
+        st.executeUpdate("insert into `user` (name) values ('asdasd'), ('bsdbsd')");
     }
 
     private static Justmappr buildJustmappr() {
@@ -37,7 +37,7 @@ public class JustmapprTest {
     void tearDown() throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:h2:mem:test");
         Statement st = conn.createStatement();
-        st.execute("drop table users");
+        st.execute("drop table `user`");
     }
 
     @Test
