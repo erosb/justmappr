@@ -20,13 +20,10 @@ class SetterBasedReconstitutionFactory<T>
         try {
             var instance = javaType.getConstructors()[0].newInstance();
             for (FieldMapping fieldMapping : fieldMappings) {
-                System.out.println("set " + fieldMapping.getAttributeName());
                 fieldMapping.getSetter().apply(instance, rs.getObject(fieldMapping.getAttributeName()));
             }
             return (T) instance;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }

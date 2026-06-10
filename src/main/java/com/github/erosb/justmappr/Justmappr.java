@@ -61,17 +61,5 @@ class DefaultJustmappr
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-//        try {
-//            var instance = constr.newInstance();
-//            for (FieldMapping fieldMapping : mappingConfig.getFieldMappings()) {
-//                System.out.println("set " + fieldMapping.getAttributeName());
-//                fieldMapping.getSetter().apply(instance, rs.getObject(fieldMapping.getAttributeName()));
-//            }
-//            return (E) instance;
-//        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-//            throw new RuntimeException(e);
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 }

@@ -14,7 +14,7 @@ import java.util.function.Function;
 import static com.github.erosb.justmappr.TrivialTypeMappingConfiguration.toDBName;
 import static java.util.Collections.unmodifiableList;
 
-public interface TypeMappingConfiguration {
+public interface TypeMappingConfiguration<T> {
 
     static <T> TypeMappingConfigurationBuilder<T> builderFor(Class<T> type) {
         return new TypeMappingConfigurationBuilder<>(type);
@@ -69,46 +69,46 @@ public interface TypeMappingConfiguration {
 
     String getJavaFieldName(String attributeName);
 
-    ReconstitutionFactory<?> getReconstitutionFactory();
+    ReconstitutionFactory<T> getReconstitutionFactory();
 
-    Class<?> getType();
+    Class<T> getType();
 
     List<String> getAttributeNames();
 
-    FieldMapping<?, ?> getPrimaryKeyMapping();
+    FieldMapping<T, ?> getPrimaryKeyMapping();
 
-    List<FieldMapping<?, ?>> getFieldMappings();
+    List<FieldMapping<T, ?>> getFieldMappings();
 }
 
-class TrivialTypeMappingConfiguration<E>
-        implements TypeMappingConfiguration {
+class TrivialTypeMappingConfiguration<T>
+        implements TypeMappingConfiguration<T> {
 
     static String toDBName(String simpleName) {
         return simpleName.toLowerCase();
     }
 
     private final String relationName;
-    private final Class<?> javaType;
-    private final List<FieldMapping<?, ?>> fieldMappings;
+    private final Class<T> javaType;
+    private final List<FieldMapping<T, ?>> fieldMappings;
     private final Map<String, String> javaFieldToAttribute;
     private final Map<String, String> attributeToJavaField;
-    private final FieldMapping<?, ?> primaryKeyMapping;
+    private final FieldMapping<T, ?> primaryKeyMapping;
 
-    TrivialTypeMappingConfiguration(Class<E> javaType, FieldMapping<?, ?> primaryKeyMapping) {
+    TrivialTypeMappingConfiguration(Class<T> javaType, FieldMapping<T, ?> primaryKeyMapping) {
         this.primaryKeyMapping = primaryKeyMapping;
         this.javaType = javaType;
         relationName = toDBName(javaType.getSimpleName());
         Field[] fields = javaType.getDeclaredFields();
         javaFieldToAttribute = new HashMap<>(fields.length);
         attributeToJavaField = new HashMap<>(fields.length);
-        List<FieldMapping<?, ?>> fieldMappings = new ArrayList<>(javaType.getDeclaredFields().length);
+        List<FieldMapping<T, ?>> fieldMappings = new ArrayList<>(javaType.getDeclaredFields().length);
         Arrays.stream(fields)
                 .map(Field::getName)
                 .forEach(fieldName -> {
                     String attributeName = toDBName(fieldName);
                     javaFieldToAttribute.put(fieldName, attributeName);
                     attributeToJavaField.put(attributeName, fieldName);
-                    fieldMappings.add(new FieldMapping<E, Object>(
+                    fieldMappings.add(new FieldMapping<T, Object>(
                             fieldName,
                             TypeMappingConfiguration.setterFor(javaType, fieldName),
                             TypeMappingConfiguration.getterFor(javaType, fieldName)
@@ -133,12 +133,12 @@ class TrivialTypeMappingConfiguration<E>
     }
 
     @Override
-    public ReconstitutionFactory<?> getReconstitutionFactory() {
-        return new SetterBasedReconstitutionFactory(javaType, fieldMappings);
+    public ReconstitutionFactory<T> getReconstitutionFactory() {
+        return new SetterBasedReconstitutionFactory<>(javaType, fieldMappings);
     }
 
     @Override
-    public Class<?> getType() {
+    public Class<T> getType() {
         return javaType;
     }
 
@@ -147,12 +147,12 @@ class TrivialTypeMappingConfiguration<E>
         return attributeToJavaField.keySet().stream().toList();
     }
 
-    public FieldMapping<?, ?> getPrimaryKeyMapping() {
+    public FieldMapping<T, ?> getPrimaryKeyMapping() {
         return primaryKeyMapping;
     }
 
     @Override
-    public List<FieldMapping<?, ?>> getFieldMappings() {
+    public List<FieldMapping<T, ?>> getFieldMappings() {
         return fieldMappings;
     }
 
