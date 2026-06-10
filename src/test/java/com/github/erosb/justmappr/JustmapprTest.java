@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.github.erosb.justmappr.TypeMappingConfiguration.trivialMapping;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,7 +59,8 @@ public class JustmapprTest {
 
     @Test
     public void requireByPK_unhandledEntity() {
-
+        assertThrows(UnknownEntityTypeException.class, () ->
+                buildJustmappr().requireByPK(ConcurrentHashMap.class, 10));
     }
 
 }

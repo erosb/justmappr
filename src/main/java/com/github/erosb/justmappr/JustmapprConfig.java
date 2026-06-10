@@ -1,13 +1,13 @@
 package com.github.erosb.justmappr;
 
 import lombok.Builder;
+import lombok.Getter;
 import lombok.Value;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Builder
-@Value
 public class JustmapprConfig {
 
     public static class JustmapprConfigBuilder {
@@ -21,7 +21,20 @@ public class JustmapprConfig {
 
     }
 
-    String connection;
+    @Getter
+    private final String connection;
 
-    Map<Class<?>, TypeMappingConfiguration> typeMappingConfig;
+    private final Map<Class<?>, TypeMappingConfiguration> typeMappingConfig;
+
+    TypeMappingConfiguration mappingConfigOfType(Class<?> type) {
+        TypeMappingConfiguration mappingConfig = typeMappingConfig.get(type);
+        if (mappingConfig == null) {
+            throw new UnknownEntityTypeException(type);
+        }
+        return mappingConfig;
+    }
+
+
+
+
 }

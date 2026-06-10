@@ -1,5 +1,7 @@
 package com.github.erosb.justmappr;
 
+import lombok.RequiredArgsConstructor;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +15,10 @@ import static com.github.erosb.justmappr.TrivialTypeMappingConfiguration.toDBNam
 import static java.util.Collections.unmodifiableList;
 
 public interface TypeMappingConfiguration {
+
+    static <T> TypeMappingConfigurationBuilder<T> builderFor(Class<T> type) {
+        return new TypeMappingConfigurationBuilder<>(type);
+    }
 
     static <E> BiFunction<E, Object, E> setterFor(Class<E> type, String fieldName) {
         return Arrays.stream(type.getDeclaredMethods())
@@ -62,6 +68,8 @@ public interface TypeMappingConfiguration {
     String getAttributeName(String javaFieldName);
 
     String getJavaFieldName(String attributeName);
+
+    ReconstitutionFactory<?> getReconstitutionFactory();
 
     Class<?> getType();
 
@@ -125,6 +133,11 @@ class TrivialTypeMappingConfiguration<E>
     }
 
     @Override
+    public ReconstitutionFactory<?> getReconstitutionFactory() {
+        throw new UnsupportedOperationException("nono");
+    }
+
+    @Override
     public Class<?> getType() {
         return javaType;
     }
@@ -141,5 +154,61 @@ class TrivialTypeMappingConfiguration<E>
     @Override
     public List<FieldMapping<?, ?>> getFieldMappings() {
         return fieldMappings;
+    }
+
+
+}
+
+@RequiredArgsConstructor
+class DefaultTypeMappingConfiguration<T>
+        implements TypeMappingConfiguration {
+
+    private final String relationName;
+    private final Class<T> javaType;
+    private final List<FieldMapping<T, ?>> fieldMappings;
+    private final FieldMapping<T, ?> primaryKeyMapping;
+    private final ReconstitutionFactory<T> reconstitutionFactory;
+
+    @Override
+    public String getRelationName() {
+        return relationName;
+    }
+
+    @Override
+    public String getAttributeName(String javaFieldName) {
+        return "";
+    }
+
+    @Override
+    public String getJavaFieldName(String attributeName) {
+        return "";
+    }
+
+    @Override
+    public ReconstitutionFactory<?> getReconstitutionFactory() {
+        return reconstitutionFactory;
+    }
+
+    @Override
+    public Class<?> getType() {
+        return javaType;
+    }
+
+    @Override
+    public List<String> getAttributeNames() {
+        ArrayList<String> attrNames = new ArrayList<>();
+        attrNames.add(primaryKeyMapping.getAttributeName());
+        attrNames.addAll(fieldMappings.stream().map(FieldMapping::getAttributeName).toList());
+        return attrNames;
+    }
+
+    @Override
+    public FieldMapping<?, ?> getPrimaryKeyMapping() {
+        return primaryKeyMapping;
+    }
+
+    @Override
+    public List<FieldMapping<?, ?>> getFieldMappings() {
+        return List.of();
     }
 }
