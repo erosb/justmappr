@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.github.erosb.justmappr.TypeMappingConfiguration.trivialMapping;
@@ -61,6 +62,17 @@ public class JustmapprTest {
     public void requireByPK_unhandledEntity() {
         assertThrows(UnknownEntityTypeException.class, () ->
                 buildJustmappr().requireByPK(ConcurrentHashMap.class, 10));
+    }
+
+    @Test
+    public void saveSuccess() {
+        var justmappr = buildJustmappr();
+
+        User u = new User(3, "John D");
+        justmappr.save(u);
+
+        var actual = justmappr.requireByPK(User.class, 3);
+        assertEquals(u, actual);
     }
 
 }

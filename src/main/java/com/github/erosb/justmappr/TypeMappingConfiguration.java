@@ -55,9 +55,9 @@ public interface TypeMappingConfiguration<T> {
                 .orElseThrow();
     }
 
-    static <E> TypeMappingConfiguration trivialMapping(Class<E> type, String primaryKeyProperty) {
-        Function<E, Object> getter = getterFor(type, primaryKeyProperty);
-        return new TrivialTypeMappingConfiguration(type, new FieldMapping<E, Object>(
+    static <T> TypeMappingConfiguration<T> trivialMapping(Class<T> type, String primaryKeyProperty) {
+        Function<T, Object> getter = getterFor(type, primaryKeyProperty);
+        return new TrivialTypeMappingConfiguration<>(type, new FieldMapping<>(
                 toDBName(primaryKeyProperty), getter
         ));
     }

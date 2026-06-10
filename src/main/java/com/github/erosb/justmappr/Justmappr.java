@@ -2,10 +2,13 @@ package com.github.erosb.justmappr;
 
 import lombok.RequiredArgsConstructor;
 
-import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
@@ -20,6 +23,8 @@ public interface Justmappr {
     }
 
     <E> E requireByPK(Class<E> clazz, Object primaryKey);
+
+    <T> void save(T entity);
 }
 
 @RequiredArgsConstructor
@@ -31,7 +36,7 @@ class DefaultJustmappr
     @Override
     public <E> E requireByPK(Class<E> clazz, Object primaryKey) {
         try {
-            var conn = DriverManager.getConnection(config.getConnection());
+            var conn = getConnection();
             TypeMappingConfiguration typeMappingConfiguration = config.mappingConfigOfType(clazz);
             var stmt = conn.prepareStatement(baseQuery(clazz) + " WHERE " + typeMappingConfiguration.getPrimaryKeyMapping().getAttributeName() + " = ?");
             stmt.setString(1, primaryKey.toString());
@@ -40,6 +45,34 @@ class DefaultJustmappr
                 return instantiate(clazz, rs);
             }
             throw new EntityNotFoundException(clazz.getSimpleName() + " not found by primary key " + primaryKey);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Connection getConnection()
+            throws SQLException {
+        return DriverManager.getConnection(config.getConnection());
+    }
+
+    @Override
+    public <E> void save(E entity) {
+        TypeMappingConfiguration<E> mappingConfig = config.mappingConfigOfType(entity.getClass());
+        List<FieldMapping<E, ?>> fieldMappings = mappingConfig.getFieldMappings();
+        var sql = "INSERT INTO `" + mappingConfig.getRelationName() + "` (" +
+        fieldMappings.stream()
+                .map(f -> (FieldMapping<E, ?>) f)
+                .map(FieldMapping::getAttributeName)
+                .collect(joining(", ")) + ") VALUES (" +
+
+        String.join(",", Collections.nCopies(fieldMappings.size(), "?")) + ")";
+
+        try {
+            var stmt = getConnection().prepareStatement(sql);
+            for (int i = 0; i < fieldMappings.size(); i++) {
+                stmt.setObject(i + 1, fieldMappings.get(i).getGetter().apply(entity));
+            }
+            stmt.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
