@@ -25,12 +25,12 @@ public class TypeMappingConfigurationBuilder<T> {
     }
 
     public <PK> TypeMappingConfigurationBuilder<T> primaryKeyMapping(Function<T, PK> getter, String attributeName) {
-        this.primaryKeyMapping = new FieldMapping<T, PK>(attributeName, null, getter);
+        this.primaryKeyMapping = new FieldMapping<>(attributeName, getter);
         return this;
     }
 
     public <F> TypeMappingConfigurationBuilder<T> fieldMapping(Function<T, F> getter, String attributeName) {
-        this.fieldMappings.add(new FieldMapping<>(attributeName, null, getter));
+        this.fieldMappings.add(new FieldMapping<>(attributeName, getter));
         return this;
     }
 

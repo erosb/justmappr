@@ -35,7 +35,7 @@ public interface TypeMappingConfiguration<T> {
                         return entity;
                     };
                 })
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("No setter for field " + fieldName + " of type " + type.getName()));
     }
 
     static <E> Function<E, Object> getterFor(Class<E> type, String fieldName) {
@@ -56,10 +56,9 @@ public interface TypeMappingConfiguration<T> {
     }
 
     static <E> TypeMappingConfiguration trivialMapping(Class<E> type, String primaryKeyProperty) {
-        BiFunction<E, Object, E> setter = setterFor(type, primaryKeyProperty);
         Function<E, Object> getter = getterFor(type, primaryKeyProperty);
         return new TrivialTypeMappingConfiguration(type, new FieldMapping<E, Object>(
-                toDBName(primaryKeyProperty), setter, getter
+                toDBName(primaryKeyProperty), getter
         ));
     }
 
@@ -110,7 +109,6 @@ class TrivialTypeMappingConfiguration<T>
                     attributeToJavaField.put(attributeName, fieldName);
                     fieldMappings.add(new FieldMapping<T, Object>(
                             fieldName,
-                            TypeMappingConfiguration.setterFor(javaType, fieldName),
                             TypeMappingConfiguration.getterFor(javaType, fieldName)
                     ));
                 });

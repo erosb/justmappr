@@ -10,7 +10,6 @@ import java.util.function.Function;
 public class FieldMapping<E, F> {
     @NonNull
     String attributeName;
-    BiFunction<E, F, E> setter;
     @NonNull
     Function<E, F> getter;
 }
